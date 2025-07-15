@@ -1,8 +1,12 @@
+const express = require('express');
+const jwt = require('jsonwebtoken');
+const User = require('./db/models/users');
+const JWT_SECRET = process.env.JWT_SECRET;
+const mongoose = require('mongoose');
 
 
 
-
-const userAuth = async(req, res, next) => {
+async function userAuth(req, res, next) {
     const prefix = 'Bearer ';
       const auth = req.header('Authorization');
     
@@ -46,4 +50,4 @@ const userAuth = async(req, res, next) => {
       }
     };
     
-    module.exports = userAuth;
+    module.exports = {userAuth};
