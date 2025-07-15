@@ -3,30 +3,33 @@ const fishRouter = express.Router({ mergeParams: true });
 const Fish = require('../db/models/fish');
 const catchAsync = require('../utils/catchAsync');
 const {requireUser} = require('../utils/requireUser');
+//const mongoose = require('mongoose');
 
 
-
+// Get all fish in the database
 fishRouter.get('/', requireUser, catchAsync(async (req, res) => {
     const fish = await Fish.find({});
     res.status(200).json(fish);
 }));
 
-// Create a new fish
+// Add a new fish to the database
 fishRouter.post('/', requireUser, catchAsync(async (req, res) => {
   console.log("Creating fish:", req.body);
 
-  const { name, species, location } = req.body;
+  const {  species, scientificName, location } = req.body;
   const userId = req.user._id;
 
-  // Check if the fish already exists for this user
-  const existingFish = await Fish.findOne({ name, species, location, userId });
+
+  // Check if the fish species already exists in the database
+  const existingFish = await Fish.findOne({ species });
+    console.log("Existing fish:", existingFish);
 
   if (existingFish) {
     return res.status(409).json({ message: 'Fish already exists in the database.' });
   }
 
   // Create and save new fish
-  const fish = new Fish({ name, species, location, userId });
+  const fish = new Fish({ species, scientificName, location, userId });
   await fish.save();
 
   console.log(`Added fish: ${fish.species}`);
