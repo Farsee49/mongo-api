@@ -4,9 +4,22 @@ const { User } = require('./users'); // Adjust path as needed
 
 
 const fishSchema = new Schema({
-    species: String,
-    scientificName: String,
-    location: String,
+    species: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    scientificName: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    location: {
+        type: String,
+        required: true,
+        trim: true
+    },
+
     // userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, {
     timestamps: true       // Automatically manage createdAt and updatedAt fields

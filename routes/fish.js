@@ -5,6 +5,12 @@ const catchAsync = require('../utils/catchAsync');
 const {requireUser} = require('../utils/requireUser');
 const mongoose = require('mongoose');
 
+
+function escapeRegex(str) {
+  return str.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
+}
+
+
 ///-----------------------------------------------------------------------------------------------------
 // Get all fish in the database
 fishRouter.get('/', requireUser, catchAsync(async (req, res) => {
@@ -37,6 +43,17 @@ fishRouter.post('/', requireUser, catchAsync(async (req, res) => {
 }));
 ///-----------------------------------------------------------------------------------------------------
 
+// Get fish by species
+fishRouter.get('/species/:species', catchAsync(async (req, res) => {
+    const { species } = req.params;
+    const fish = await Fish.find({ species });
+    if (!fish || fish.length === 0) {
+        return res.status(404).json({ message: 'No fish found for this species' });
+    }
+    res.status(200).json(fish);
+}));
+///-----------------------------------------------------------------------------------------------------
+
 // Get a specific fish by ID
 fishRouter.get('/:fishId', catchAsync(async (req, res) => {
     const { fishId } = req.params;
@@ -59,13 +76,37 @@ fishRouter.get('/:fishId', catchAsync(async (req, res) => {
 }));
 ///-----------------------------------------------------------------------------------------------------
 
-// Get fish by species
-fishRouter.get('/species/:species', catchAsync(async (req, res) => {
-    const { species } = req.params;
-    const fish = await Fish.find({ species });
-    if (!fish || fish.length === 0) {
-        return res.status(404).json({ message: 'No fish found for this species' });
+// Update a fish by ID
+fishRouter.put('/:fishId', requireUser, catchAsync(async (req, res) => {
+    const { fishId } = req.params;
+    const { species, scientificName, location } = req.body;
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(fishId)) {
+        return res.status(400).json({ message: 'Invalid fish ID format' });
     }
+
+    const fish = await Fish.findById(fishId);
+    if (!fish) {
+        return res.status(404).json({ message: 'Fish not found' });
+    }
+
+    if (species && species.toLowerCase() !== fish.species.toLowerCase()) {
+        const duplicate = await Fish.findOne({
+            _id: { $ne: fishId },
+            species: new RegExp(`^${escapeRegex(species)}$`, 'i')
+        });
+        if (duplicate) {
+            return res.status(409).json({ message: 'Another fish with this species already exists.' });
+        }
+    }
+
+    // Update fish properties if provided
+    if (species) fish.species = species;
+    if (scientificName) fish.scientificName = scientificName;
+    if (location) fish.location = location;
+
+    await fish.save();
     res.status(200).json(fish);
 }));
 

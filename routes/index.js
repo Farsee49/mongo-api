@@ -55,5 +55,8 @@ apiRouter.use('/fish', fishRouter);
 const userRouter = require('./users');
 apiRouter.use('/users', userRouter);
 
+const postRouter = require('./posts');
+apiRouter.use('/posts', postRouter);
+
 
 module.exports = apiRouter;
