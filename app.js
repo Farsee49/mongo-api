@@ -12,7 +12,8 @@ const apiRouter = require('./routes/index');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const User = require('./db/models/users');
-const { userAuth } = require('./middleware');
+const { userAuth, ignoreFavicon } = require('./middleware');
+
 
 
 // Connect to MongoDB
@@ -35,6 +36,7 @@ server.use(methodOverride('_method'));
 server.use(morgan('dev'));
 server.use(express.static(path.join(__dirname, 'public')));
 server.use(userAuth);
+server.use(ignoreFavicon);
 server.use('', (req, res, next) => {
     console.log('Server Request Received');
     next();

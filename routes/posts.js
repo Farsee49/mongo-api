@@ -6,6 +6,7 @@ const { requireUser } = require('../utils/requireUser');
 const mongoose = require('mongoose');
 const escapeRegex = require('../utils/escapeRegex');
 
+
 ///-----------------------------------------------------------------------------------------------------
 // Get all posts in the database
 postRouter.get('/', requireUser, catchAsync(async (req, res) => {

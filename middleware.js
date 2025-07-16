@@ -49,5 +49,13 @@ async function userAuth(req, res, next) {
         });
       }
     };
-    
-    module.exports = {userAuth};
+
+  function ignoreFavicon(req, res, next) {
+  if (req.originalUrl === '/favicon.ico') {
+    return res.status(204).end();
+  }
+  next();
+}
+
+
+    module.exports = {userAuth, ignoreFavicon};
