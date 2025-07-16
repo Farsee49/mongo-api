@@ -3,15 +3,15 @@ const fishRouter = express.Router({ mergeParams: true });
 const Fish = require('../db/models/fish');
 const catchAsync = require('../utils/catchAsync');
 const {requireUser} = require('../utils/requireUser');
-//const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-
+///-----------------------------------------------------------------------------------------------------
 // Get all fish in the database
 fishRouter.get('/', requireUser, catchAsync(async (req, res) => {
     const fish = await Fish.find({});
     res.status(200).json(fish);
 }));
-
+///-----------------------------------------------------------------------------------------------------
 // Add a new fish to the database
 fishRouter.post('/', requireUser, catchAsync(async (req, res) => {
   console.log("Creating fish:", req.body);
@@ -35,16 +35,29 @@ fishRouter.post('/', requireUser, catchAsync(async (req, res) => {
   console.log(`Added fish: ${fish.species}`);
   res.status(201).json(fish);
 }));
+///-----------------------------------------------------------------------------------------------------
 
 // Get a specific fish by ID
-fishRouter.get('/:fishId', requireUser, catchAsync(async (req, res) => {
+fishRouter.get('/:fishId', catchAsync(async (req, res) => {
     const { fishId } = req.params;
+    console.log("Fetching fish with ID:", fishId);
+    
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(fishId)) {
+        return res.status(400).json({ message: 'Invalid fish ID format' });
+    }
+    
+    console.log("Fetching fish with ID:", fishId);
     const fish = await Fish.findById(fishId);
+    console.log("Fish found:", fish);
+    
     if (!fish) {
         return res.status(404).json({ message: 'Fish not found' });
     }
+    
     res.status(200).json(fish);
 }));
+///-----------------------------------------------------------------------------------------------------
 
 // Get fish by species
 fishRouter.get('/species/:species', catchAsync(async (req, res) => {
