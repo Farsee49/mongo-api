@@ -109,5 +109,28 @@ fishRouter.put('/:fishId', requireUser, catchAsync(async (req, res) => {
     await fish.save();
     res.status(200).json(fish);
 }));
+///-----------------------------------------------------------------------------------------------------
+
+// Delete a fish by ID
+fishRouter.delete('/:fishId', requireUser, catchAsync(async (req, res) => {
+    const { fishId } = req.params;
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(fishId)) {
+        return res.status(400).json({ message: 'Invalid fish ID format' });
+    }
+
+    const fish = await Fish.findByIdAndDelete(fishId);
+    
+    if (!fish) {
+        return res.status(404).json({ message: 'Fish not found' });
+    }
+
+      // res.status(204).end();
+    // Optionally, you can return a message or the deleted fish object
+   res.status(200).json({ message: 'Fish deleted successfully', fish });
+
+      console.log(`Deleted fish with ID: ${fishId}`);
+}));
 
 module.exports = fishRouter;
